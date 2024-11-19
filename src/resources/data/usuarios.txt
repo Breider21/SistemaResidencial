@@ -1,0 +1,19 @@
+2,María Gómez,Propietario,Av. Libertad 456,555-5678,maria.gomez@email.com
+3,Carlos López,Vigilante,Calle 7 789,555-9876,carlos.lopez@email.com
+4,Ana Torres,Propietario,Blvd. Sol 101,555-2468,ana.torres@email.com
+5,Luis Martínez,Administrador,Calle Real 555,555-1357,luis.martinez@email.com
+6,Patricia Díaz,Vigilante,Av. del Parque 900,555-8642,patricia.diaz@email.com
+7,Jorge Sánchez,Propietario,Calle Luna 22,555-1122,jorge.sanchez@email.com
+8,Isabel Ramírez,Administrador,Calle Norte 33,555-3344,isabel.ramirez@email.com
+9,Hugo García,Propietario,Av. Central 50,555-5566,hugo.garcia@email.com
+10,Silvia Rodríguez,Vigilante,Av. del Río 800,555-7788,silvia.rodriguez@email.com
+23,camila,Vigilante,d,333,fff
+13,andres,Administrador,f,3,r
+33,ffff,Administrador,f,3,ddd
+1,ddd,Propietario,ff,3,fg
+1233,fff,Vigilante,ff,333,fff
+333,dd,Administrador,fff,3333,ff
+2222,e,Administrador,d,3,f
+256,Carlos,Propietario,ccc,333,dsds
+333332,fdsfsad,Propietario,fsdfsd,2222,fgdfgd
+321,dasdas,Vigilante,adasd,222,fdfs
