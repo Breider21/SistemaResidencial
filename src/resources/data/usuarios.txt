@@ -17,3 +17,6 @@
 256,Carlos,Propietario,ccc,333,dsds
 333332,fdsfsad,Propietario,fsdfsd,2222,fgdfgd
 321,dasdas,Vigilante,adasd,222,fdfs
+567,hfsjd,Vigilante,sdfsd,333,ffsd
+4555,Alex,Propietario,sadfs,3333,fdfs
+5555,Ester,Propietario,gfdgd,3333,fdfsdf

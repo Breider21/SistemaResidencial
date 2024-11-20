@@ -1,12 +1,16 @@
 package models;
 
+import controllers.AccesoVehicularController;
+
 public class AccesoVehicular {
     private Vehiculo vehiculo;
     private boolean entradaPermitida;
+    private AccesoVehicularController accesoVehicularController;
 
     public AccesoVehicular(Vehiculo vehiculo) {
         this.vehiculo = vehiculo;
         this.entradaPermitida = false;
+        this.accesoVehicularController = new AccesoVehicularController();
     }
 
     public boolean verificarAcceso(Vehiculo vehiculo) {
@@ -20,10 +24,17 @@ public class AccesoVehicular {
             vehiculo.registrarEntrada();
             this.entradaPermitida = true;
             System.out.println("Acceso permitido para el vehículo con placa: " + vehiculo.getPlaca());
+            accesoVehicularController.registrarAccesoVehiculoInvitado(new Invitado("", vehiculo));
         } else {
             this.entradaPermitida = false;
             System.out.println("Acceso denegado para el vehículo con placa: " + vehiculo.getPlaca());
         }
+    }
+
+    public void registrarSalida(Vehiculo vehiculo) {
+        vehiculo.registrarSalida();
+        System.out.println("Salida registrada para el vehículo con placa: " + vehiculo.getPlaca());
+        accesoVehicularController.registrarSalidaVehiculoInvitado(new Invitado("", vehiculo));
     }
 
     // Getters y setters para los atributos

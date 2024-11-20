@@ -1,12 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package models;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import controllers.MercanciaController;
 import controllers.PagoController;
 import controllers.VehiculoController;
 
@@ -15,6 +13,7 @@ public class Propietario extends Usuario {
     private List<Vehiculo> vehiculos; // Composición: Un Propietario puede tener muchos Vehiculos
     private List<Pago> pagos; // Agregación: Un Propietario puede realizar muchos Pagos
     private PagoController pagoController;
+    private MercanciaController mercanciaController;
 
     public Propietario(int id, String nombre, String rol, String direccion, String telefono, String email) {
         super(id, nombre, rol, direccion, telefono, email);
@@ -22,6 +21,7 @@ public class Propietario extends Usuario {
         this.vehiculos = new ArrayList<>();
         this.pagos = new ArrayList<>();
         this.pagoController = new PagoController();
+        this.mercanciaController = new MercanciaController();
     }
 
     public void realizarPago(int idPago, float monto) {
@@ -92,9 +92,30 @@ public class Propietario extends Usuario {
         }
     }
     
+    public void autorizarAccesoInvitado(Invitado invitado) {
+        if (isCuotaPaga()) {
+            System.out.println("Acceso autorizado para el invitado: " + invitado.getNombre());
+        } else {
+            System.out.println("No se puede autorizar el acceso. El propietario no tiene la cuota al día.");
+        }
+    }
     
+    public List<String> visualizarLlegadasMercancia() {
+        List<Mercancia> mercancias = mercanciaController.obtenerMercanciaPorIdPropietario(this.getId());
+        List<String> llegadas = new ArrayList<>();
+        if (mercancias == null || mercancias.isEmpty()) {
+            return llegadas;
+        }
     
-    
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        llegadas.add("Llegadas de mercancía para el propietario " + this.getNombre() + ":");
+        for (Mercancia mercancia : mercancias) {
+            llegadas.add("- ID: " + mercancia.getIdMercancia() +
+                         ", Descripción: " + mercancia.getDescripcion() +
+                         ", Fecha de llegada: " + sdf.format(mercancia.getFechaLlegada()));
+        }
+        return llegadas;
+    }
     
 
     // Getter y setter para cuotaPaga
@@ -126,5 +147,10 @@ public class Propietario extends Usuario {
     @Override
     public String toString() {
         return super.toString();
+    }
+
+    public List<Mercancia> getMercancias() {
+        List<Mercancia> mercancias = mercanciaController.obtenerMercanciaPorIdPropietario(this.getId());
+        return mercancias != null ? mercancias : new ArrayList<>();
     }
 }

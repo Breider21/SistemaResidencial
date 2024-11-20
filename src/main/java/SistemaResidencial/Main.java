@@ -1,14 +1,19 @@
 package SistemaResidencial;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
 import controllers.IncidenteController;
+import controllers.MercanciaController;
 import controllers.PagoController;
 import controllers.UsuarioController;
 import controllers.VehiculoController;
 import models.Administrador;
 import models.Incidente;
+import models.Mercancia;
 import models.Propietario;
 import models.Sistema;
 import models.Usuario;
@@ -29,10 +34,13 @@ public class Main {
         // Cargar usuarios desde el archivo
         sistema.cargarDatos();
 
+        menuPrincipal(scanner);
+    }
+
+    private static void menuPrincipal(Scanner scanner) {
         while (true) {
             System.out.println("\nMenú Principal:");
             System.out.println("1. Iniciar sesión");
-            System.out.println("2. Registrar nuevo usuario");
             System.out.println("3. Salir");
             System.out.print("Seleccione una opción: ");
             int opcion = scanner.nextInt();
@@ -43,9 +51,6 @@ public class Main {
                     iniciarSesion(scanner);
                     break;
                 case 2:
-                    registrarNuevoUsuario(scanner);
-                    break;
-                case 3:
                     System.out.println("Saliendo...");
                     return;
                 default:
@@ -80,7 +85,7 @@ public class Main {
                     id, usuario.getNombre(), rol, usuario.getDireccion(),
                     usuario.getTelefono(), usuario.getEmail(), "Zona A"
                 );
-                //mostrarMenuVigilante(vigilante, scanner);
+                mostrarMenuVigilante(vigilante, scanner);
             } else {
                 System.out.println("Rol no soportado para iniciar sesión.");
             }
@@ -187,7 +192,8 @@ public class Main {
             System.out.println("3. Ver lista de vehículos registrados");
             System.out.println("4. Agregar un nuevo vehículo");
             System.out.println("5. Ver incidentes");
-            System.out.println("6. Salir");
+            System.out.println("6. Visualizar llegadas de mercancía");
+            System.out.println("7. Salir");
             System.out.print("Seleccione una opción: ");
             int opcion = scanner.nextInt();
             scanner.nextLine(); // Consumir la nueva línea
@@ -199,8 +205,6 @@ public class Main {
                 scanner.nextLine(); // Consumir la nueva línea
                 System.out.println("Ingrese la descripción del pago:");
                 String descripcionPago = scanner.nextLine();
-        
-                // Asumiendo que hay un PagoController y un método registrarPago
                 PagoController pagoController = new PagoController();
                 pagoController.registrarPago(propietario, (float) monto, descripcionPago);
         
@@ -258,7 +262,24 @@ public class Main {
                         System.out.println(inc.getDescripcion());
                     }
                     break;
-                case 6:
+                    case 6:
+                        System.out.println("\nLlegadas de mercancía registradas:");
+                        List<Mercancia> mercancias = propietario.getMercancias(); // Supongo que existe este método para obtener las mercancías de un propietario
+                        if (mercancias == null || mercancias.isEmpty()) {
+                            System.out.println("No hay llegadas de mercancía registradas.");
+                        } else {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                            System.out.println("Las siguientes mercancías han llegado:");
+                            for (Mercancia mercancia : mercancias) {
+                                System.out.println("- ID: " + mercancia.getIdMercancia() +
+                                        ", Descripción: " + mercancia.getDescripcion() +
+                                        ", Fecha de llegada: " + (mercancia.getFechaLlegada() != null ? sdf.format(mercancia.getFechaLlegada()) : "Fecha no registrada"));
+                            }
+                        }
+                        break;
+
+
+                case 7:
                     return;
                 default:
                     System.out.println("\nOpción no válida.");
@@ -266,53 +287,107 @@ public class Main {
         }
     }
 
-    /*
+
     private static void mostrarMenuVigilante(Vigilante vigilante, Scanner scanner) {
         while (true) {
             System.out.println("\nMenú Vigilante:");
             System.out.println("1. Registrar un incidente");
             System.out.println("2. Gestionar acceso vehicular");
             System.out.println("3. Ver lista de incidentes");
-            System.out.println("4. Salir");
+            System.out.println("4. Registrar mercancía");
+            System.out.println("5. Salir");
             System.out.print("Seleccione una opción: ");
             int opcion = scanner.nextInt();
             scanner.nextLine(); // Consumir la nueva línea
-
+    
             switch (opcion) {
                 case 1:
+                    // Registrar un incidente
                     System.out.println("\nIngrese la descripción del incidente:");
                     String descripcion = scanner.nextLine();
                     Incidente incidente = new Incidente(vigilante.getId(), descripcion, vigilante);
                     vigilante.registrarIncidente(incidente);
-                    sistema.registrarIncidente(incidente);
                     break;
                 case 2:
+                    // Gestionar acceso vehicular
                     System.out.println("\nIngrese la placa del vehículo:");
                     String placa = scanner.nextLine();
-                    Vehiculo vehiculo = sistema.getVehiculos().stream()
-                            .filter(v -> v.getPlaca().equalsIgnoreCase(placa))
-                            .findFirst()
-                            .orElse(null);
-                    if (vehiculo != null) {
-                        vigilante.gestionarAccesoVehiculo(vehiculo);
-                    } else {
-                        System.out.println("Vehículo no encontrado.");
-                    }
+                    System.out.println("Ingrese el modelo del vehículo:");
+                    String modelo = scanner.nextLine();
+                    System.out.println("Ingrese el color del vehículo:");
+                    String color = scanner.nextLine();
+                    // Asumiendo que el propietario es conocido o se obtiene de alguna manera
+                    Propietario propietario = obtenerPropietario(); // Implementa este método según tu lógica
+                    Vehiculo vehiculo = new Vehiculo(placa, propietario, modelo, color);
+                    vigilante.gestionarAccesoVehiculo(vehiculo);
                     break;
                 case 3:
                     System.out.println("\nIncidentes registrados:");
                     for (Incidente inc : vigilante.verIncidentes()) {
-                        System.out.println(inc.getDescripcion());
+                        System.out.println("ID: " + inc.getId() + ", Descripción: " + inc.getDescripcion());
                     }
                     break;
                 case 4:
+                    System.out.println("\nIngrese la descripción de la mercancía:");
+                    String descripcionMercancia = scanner.nextLine();
+
+                    System.out.println("Ingrese el ID único de la mercancía:");
+                    int idMercancia = Integer.parseInt(scanner.nextLine());
+
+                    System.out.println("Ingrese la fecha de llegada (formato: dd/MM/yyyy):");
+                    String fechaInput = scanner.nextLine();
+                    Date fechaLlegada = null;
+                    try {
+                        fechaLlegada = new SimpleDateFormat("dd/MM/yyyy").parse(fechaInput);
+                    } catch (ParseException e) {
+                        System.out.println("Formato de fecha incorrecto. Asegúrese de usar dd/MM/yyyy.");
+                        break;
+                    }
+
+                    System.out.println("Ingrese el ID del propietario asociado:");
+                    int idPropietario = Integer.parseInt(scanner.nextLine());
+
+                    // Verificar si el propietario existe
+                    Propietario propietarioEncontrado = (Propietario) usuarioController.obtenerUsuarioPorId(idPropietario);
+                    if (propietarioEncontrado == null) {
+                        System.out.println("Propietario no encontrado. Verifique el ID.");
+                        break;
+                    }
+
+                    // Crear y agregar la mercancía
+                    Mercancia nuevaMercancia = new Mercancia(idMercancia, descripcionMercancia, fechaLlegada, propietarioEncontrado);
+                    MercanciaController mercanciaController = new MercanciaController();
+                    boolean agregado = mercanciaController.registrarMercancia(idMercancia, descripcionMercancia, fechaInput, idPropietario);
+
+                    if (agregado) {
+                        System.out.println("Mercancía registrada exitosamente.");
+                    } else {
+                        System.out.println("No se pudo registrar la mercancía. Verifique los datos e intente nuevamente.");
+                    }
+                    break;
+
+                case 5:
                     return;
                 default:
                     System.out.println("\nOpción no válida.");
             }
         }
     }
-    */
+
+    private static Propietario obtenerPropietario() {
+        System.out.println("Ingrese el ID del propietario:");
+        Scanner scanner = new Scanner(System.in);
+        int id = scanner.nextInt();
+        scanner.nextLine(); // Consumir la nueva línea
+
+        Usuario usuario = usuarioController.obtenerUsuarioPorId(id);
+        if (usuario instanceof Propietario) {
+            return (Propietario) usuario;
+        } else {
+            System.out.println("Propietario no encontrado o ID no corresponde a un propietario.");
+            return null;
+        }
+    }
+    
 
 }
-

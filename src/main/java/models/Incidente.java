@@ -76,4 +76,8 @@ public class Incidente {
     public void setResuelto(boolean resuelto) {
         this.resuelto = resuelto;
     }
+
+    void setEstado(boolean b) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

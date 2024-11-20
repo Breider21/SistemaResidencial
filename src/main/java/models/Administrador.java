@@ -218,6 +218,26 @@ public class Administrador extends Usuario {
         }
     }
 
+    public void cambiarEstadoIncidente(int idIncidente, String ruta) {
+        List<Incidente> incidentes = incidenteController.leerIncidentes(ruta);
+        boolean encontrado = false;
+
+        for (Incidente incidente : incidentes) {
+            if (incidente.getId() == idIncidente) {
+                incidente.setEstado(true);
+                encontrado = true;
+                break;
+            }
+        }
+
+        if (encontrado) {
+            incidenteController.guardarIncidentes(incidentes, ruta);
+            System.out.println("El estado del incidente con ID " + idIncidente + " ha sido cambiado a true.");
+        } else {
+            System.out.println("Incidente con ID " + idIncidente + " no encontrado.");
+        }
+    }
+
     
     @Override
     public String toString() {

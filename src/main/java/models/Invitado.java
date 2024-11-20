@@ -10,7 +10,7 @@ public class Invitado {
     private Propietario propietario; // Agregación: Un Invitado está asociado a un Propietario
     private Vehiculo vehiculo;
 
-    public Invitado(String nombre, String documentoIdentidad, Propietario propietario, Vehiculo vehiculo) {
+    public Invitado(String nombre, Vehiculo vehiculo) {
         this.nombre = nombre;
         this.documentoIdentidad = documentoIdentidad;
         this.propietario = propietario;

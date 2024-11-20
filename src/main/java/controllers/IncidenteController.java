@@ -29,4 +29,8 @@ public class IncidenteController {
         String ruta = "src/resources/data/incidentes.txt";
         FileHandler.agregarIncidente(ruta, incidente);
     }
+
+    public void guardarIncidentes(List<Incidente> incidentes, String ruta) {
+        fileHandler.guardarIncidentes(incidentes, ruta);
+    }
 }

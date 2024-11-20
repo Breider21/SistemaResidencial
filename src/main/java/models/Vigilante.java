@@ -1,36 +1,34 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package models;
 
 import java.util.List;
+
+import controllers.IncidenteController;
+import controllers.MercanciaController;
 
 public class Vigilante extends Usuario {
     private String zonaAsignada;
     private List<Incidente> incidentesRegistrados; // Agregación: Un Vigilante puede registrar muchos Incidentes
     private boolean cuotaPaga;
+    private IncidenteController incidenteController;
     
     public Vigilante(int id, String nombre, String rol, String direccion, String telefono, String email,
             String zonaAsignada) {
         super(id, nombre, rol, direccion, telefono, email);
         this.zonaAsignada = zonaAsignada;
         this.incidentesRegistrados = Sistema.getInstancia().getIncidentes();
+        this.incidenteController = new IncidenteController();
         this.cuotaPaga = false;
     }
 
     public void registrarIncidente(Incidente incidente) {
-        // Implementar la lógica para registrar un incidente en el sistema
+        incidenteController.registrarIncidente(incidente);
         incidentesRegistrados.add(incidente);
-        Sistema sistema = Sistema.getInstancia();
-        sistema.registrarIncidente(incidente);
+        System.out.println("Incidente registrado: " + incidente.getDescripcion());
+        
     }
 
     public List<Incidente> verIncidentes() {
-        if (incidentesRegistrados == null || incidentesRegistrados.isEmpty()) {
-            System.out.println("No hay incidentes registrados.");
-        }
-        return incidentesRegistrados;
+            return incidenteController.leerIncidentes(zonaAsignada);
     }
 
     public void gestionarAccesoVehiculo(Vehiculo vehiculo) {
@@ -56,5 +54,12 @@ public class Vigilante extends Usuario {
 
     public void setZonaAsignada(String zonaAsignada) {
         this.zonaAsignada = zonaAsignada;
+    }
+
+    private MercanciaController mercanciaController = new MercanciaController();
+
+    public void registrarMercancia(Mercancia mercancia) {
+        mercanciaController.registrarMercancia(getId(), zonaAsignada, zonaAsignada, getId());
+        System.out.println("Mercancía registrada: " + mercancia.getDescripcion());
     }
 }

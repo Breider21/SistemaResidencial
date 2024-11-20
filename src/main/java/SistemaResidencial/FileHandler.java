@@ -7,13 +7,18 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.AccesoVehicular;
 import models.Administrador;
 import models.Incidente;
+import models.Mercancia;
 import models.Pago;
 import models.Propietario;
 import models.Usuario;
@@ -23,6 +28,8 @@ import models.Vigilante;
 public class FileHandler {
 
     private static final String ID_FILE_PATH = "src/resources/data/ultimo_id_pago.txt";
+    private static final String RUTA_ACCESOS_VEHICULARES = "src/resources/data/accesos_vehiculares.txt";
+    private static final String RUTA_MERCANCIAS = "src/resources/data/mercancias.txt";
 
     public static int obtenerUltimoIdPago() {
         try (BufferedReader br = new BufferedReader(new FileReader(ID_FILE_PATH))) {
@@ -174,7 +181,7 @@ public class FileHandler {
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split(",");
                 if (datos.length != 5) {
-                    System.out.println("Formato incorrecto en la l��nea: " + linea);
+                    System.out.println("Formato incorrecto en la linea: " + linea);
                     continue;
                 }
                 try {
@@ -274,5 +281,158 @@ public class FileHandler {
         } catch (IOException e) {
             System.out.println("Error al escribir los pagos: " + e.getMessage());
         }
+    }
+
+    public static void agregarAccesoVehicular(AccesoVehicular acceso) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(RUTA_ACCESOS_VEHICULARES, true))) {
+            bw.write(acceso.getVehiculo().getPlaca() + "," + acceso.isEntradaPermitida());
+            bw.newLine();
+        } catch (IOException e) {
+            System.out.println("Error al guardar el acceso vehicular en el archivo: " + e.getMessage());
+        }
+    }
+
+    public static List<AccesoVehicular> leerAccesosVehiculares() {
+        List<AccesoVehicular> accesos = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(RUTA_ACCESOS_VEHICULARES))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length == 2) {
+                    Vehiculo vehiculo = new Vehiculo();
+                    vehiculo.setPlaca(datos[0]);
+                    boolean entradaPermitida = Boolean.parseBoolean(datos[1]);
+                    AccesoVehicular acceso = new AccesoVehicular(vehiculo);
+                    acceso.setEntradaPermitida(entradaPermitida);
+                    accesos.add(acceso);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer los accesos vehiculares: " + e.getMessage());
+        }
+        return accesos;
+    }
+
+    public static void escribirAccesosVehiculares(String ruta, List<AccesoVehicular> accesos) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ruta))) {
+            for (AccesoVehicular acceso : accesos) {
+                bw.write(acceso.getVehiculo().getPlaca() + "," + acceso.isEntradaPermitida());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error al escribir los accesos vehiculares: " + e.getMessage());
+        }
+    }
+
+    public static void agregarMercancia(String RUTA_MERCANCIAS, Mercancia mercancia) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(RUTA_MERCANCIAS, true))) {
+            bw.write(String.format("%d,%s,%s,%s,%s,%s",
+                mercancia.getId(),
+                mercancia.getDescripcion(),
+                mercancia.getProveedor(),
+                mercancia.getFechaEntrada() != null ? mercancia.getFechaEntrada().toString() : "",
+                mercancia.getFechaSalida() != null ? mercancia.getFechaSalida().toString() : "",
+                mercancia.isEntregada()
+            ));
+            bw.newLine();
+        } catch (IOException e) {
+            System.out.println("Error al guardar la mercancia en el archivo: " + e.getMessage());
+        }
+    }
+
+    public static List<Mercancia> leerMercancias(String RUTA_MERCANCIAS, List<Propietario> propietarios) {
+    List<Mercancia> mercancias = new ArrayList<>();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+    try (BufferedReader br = new BufferedReader(new FileReader(RUTA_MERCANCIAS))) {
+        String linea;
+        while ((linea = br.readLine()) != null) {
+            String[] datos = linea.split(",");
+            if (datos.length == 4) { // Ajustado al número de campos de la clase Mercancia
+                try {
+                    int id = Integer.parseInt(datos[0]);
+                    String descripcion = datos[1];
+                    Date fechaLlegada = datos[2].isEmpty() ? null : (Date) sdf.parse(datos[2]);
+                    String nombrePropietario = datos[3];
+
+                    // Buscar el propietario en la lista de propietarios
+                    Propietario propietario = propietarios.stream()
+                            .filter(p -> p.getNombre().equals(nombrePropietario))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (propietario != null) {
+                        Mercancia mercancia = new Mercancia(id, descripcion, fechaLlegada, propietario);
+                        mercancias.add(mercancia);
+                    } else {
+                        System.out.println("Propietario no encontrado para la mercancía con ID: " + id);
+                    }
+                } catch (NumberFormatException | ParseException e) {
+                    System.out.println("Error al procesar los datos en la línea: " + linea);
+                }
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Error al leer las mercancías: " + e.getMessage());
+    }
+
+    return mercancias;
+}
+
+    public static List<Mercancia> leerMercancias(String RUTA_MERCANCIAS) {
+        List<Mercancia> mercancias = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(RUTA_MERCANCIAS))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length == 6) {
+                    try {
+                        int id = Integer.parseInt(datos[0]);
+                        String descripcion = datos[1];
+                        String proveedor = datos[2];
+                        LocalDateTime fechaEntrada = datos[3].isEmpty() ? null : LocalDateTime.parse(datos[3]);
+                        LocalDateTime fechaSalida = datos[4].isEmpty() ? null : LocalDateTime.parse(datos[4]);
+                        boolean entregada = Boolean.parseBoolean(datos[5]);
+                        Mercancia mercancia = new Mercancia(id, descripcion, null, null);
+                        mercancias.add(mercancia);
+                    } catch (NumberFormatException | DateTimeParseException e) {
+                        System.out.println("Error al convertir los datos en la línea: " + linea);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer las mercancias: " + e.getMessage());
+        }
+        return mercancias;
+    }
+
+
+    public static void escribirMercancias(String RUTA_MERCANCIAS, List<Mercancia> mercancias) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(RUTA_MERCANCIAS))) {
+            for (Mercancia mercancia : mercancias) {
+                bw.write(String.format("%d,%s,%s,%s,%s,%s",
+                    mercancia.getId(),
+                    mercancia.getDescripcion(),
+                    mercancia.getProveedor(),
+                    mercancia.getFechaEntrada() != null ? mercancia.getFechaEntrada().toString() : "",
+                    mercancia.getFechaSalida() != null ? mercancia.getFechaSalida().toString() : "",
+                    mercancia.isEntregada()
+                ));
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error al escribir las mercancias: " + e.getMessage());
+        }
+    }
+
+    public void guardarIncidentes(List<Incidente> incidentes, String ruta) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ruta))) {
+            for (Incidente incidente : incidentes) {
+                bw.write(incidente.toString());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+    }
     }
 }
